@@ -61,7 +61,7 @@ public class CalculateUtil {
 		List<String> formulaList = Arrays.asList(formula.split(""));
 		LinkedList<String> partFormula = new LinkedList<String>();
 		String function = "";
-		boolean muti = false;
+		boolean complex = false;
 		int countLeftParentheses = 0;
 		int countRightParentheses = 0;
 		for (int i = 0; i < formulaList.size(); i++) {
@@ -72,7 +72,7 @@ public class CalculateUtil {
 					function += s;
 				}
 				countLeftParentheses++;
-				muti = true;
+				complex = true;
 			} else if (s.equals(")")) {
 				countRightParentheses++;
 				if (countRightParentheses != countLeftParentheses) {
@@ -80,14 +80,14 @@ public class CalculateUtil {
 				}
 				if (countLeftParentheses == countRightParentheses) {
 					partFormula.add(function);
-					muti = false;
+					complex = false;
 					function = "";
 					countLeftParentheses = 0;
 					countRightParentheses = 0;
 				}
 
 			} else {
-				if (muti) {
+				if (complex) {
 					function += s;
 				} else {
 					if (isOperation(s)) {
@@ -124,7 +124,7 @@ public class CalculateUtil {
 		List<String> formulaList = Arrays.asList(cleanFormula.toString().split(""));
 		this.formula = new LinkedList<String>();
 		String function = "";
-		boolean muti = false;
+		boolean complex = false;
 		int countLeftParentheses = 0;
 		int countRightParentheses = 0;
 		System.out.println(formulaList);
@@ -136,7 +136,7 @@ public class CalculateUtil {
 					function += s;
 				}
 				countLeftParentheses++;
-				muti = true;
+				complex = true;
 			} else if (s.equals(")")) {
 				countRightParentheses++;
 				if (countRightParentheses != countLeftParentheses) {
@@ -144,14 +144,14 @@ public class CalculateUtil {
 				}
 				if (countLeftParentheses == countRightParentheses) {
 					this.formula.add(function);
-					muti = false;
+					complex = false;
 					function = "";
 					countLeftParentheses = 0;
 					countRightParentheses = 0;
 				}
 			} else {
 
-				if (muti) {
+				if (complex) {
 					function += s;
 				} else {
 					if (isOperation(s)) {
