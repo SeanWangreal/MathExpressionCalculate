@@ -61,7 +61,7 @@ public class CalculateUtil {
 		List<String> formulaList = Arrays.asList(formula.split(""));
 		LinkedList<String> partFormula = new LinkedList<String>();
 		String function = "";
-		boolean milti = false;
+		boolean muti = false;
 		int countLeftParentheses = 0;
 		int countRightParentheses = 0;
 		for (int i = 0; i < formulaList.size(); i++) {
@@ -72,7 +72,7 @@ public class CalculateUtil {
 					function += s;
 				}
 				countLeftParentheses++;
-				milti = true;
+				muti = true;
 			} else if (s.equals(")")) {
 				countRightParentheses++;
 				if (countRightParentheses != countLeftParentheses) {
@@ -80,14 +80,14 @@ public class CalculateUtil {
 				}
 				if (countLeftParentheses == countRightParentheses) {
 					partFormula.add(function);
-					milti = false;
+					muti = false;
 					function = "";
 					countLeftParentheses = 0;
 					countRightParentheses = 0;
 				}
 
 			} else {
-				if (milti) {
+				if (muti) {
 					function += s;
 				} else {
 					if (isOperation(s)) {
@@ -110,10 +110,21 @@ public class CalculateUtil {
 	}
 
 	private void setFormula(String formula) {
-		List<String> formulaList = Arrays.asList(formula.split(""));
+		StringBuilder cleanFormula = new StringBuilder();
+		if (formula.contains(" ")) {
+			for (int i = 0; i < formula.length(); i++) {
+				char chr = formula.charAt(i);
+				if (chr != ' ') {
+					cleanFormula.append(chr);
+				}
+			}
+		} else {
+			cleanFormula.append(formula);
+		}
+		List<String> formulaList = Arrays.asList(cleanFormula.toString().split(""));
 		this.formula = new LinkedList<String>();
 		String function = "";
-		boolean milti = false;
+		boolean muti = false;
 		int countLeftParentheses = 0;
 		int countRightParentheses = 0;
 		System.out.println(formulaList);
@@ -125,7 +136,7 @@ public class CalculateUtil {
 					function += s;
 				}
 				countLeftParentheses++;
-				milti = true;
+				muti = true;
 			} else if (s.equals(")")) {
 				countRightParentheses++;
 				if (countRightParentheses != countLeftParentheses) {
@@ -133,14 +144,14 @@ public class CalculateUtil {
 				}
 				if (countLeftParentheses == countRightParentheses) {
 					this.formula.add(function);
-					milti = false;
+					muti = false;
 					function = "";
 					countLeftParentheses = 0;
 					countRightParentheses = 0;
 				}
 			} else {
 
-				if (milti) {
+				if (muti) {
 					function += s;
 				} else {
 					if (isOperation(s)) {
@@ -232,6 +243,60 @@ public class CalculateUtil {
 		}
 		return num.toString();
 	}
+	
+	//遞迴
+	private String keepCalculate(String fraction) {
+		BigDecimal filnalResult = BigDecimal.ZERO;
+
+		LinkedList<String> partFormula = setPartFormula(fraction);
+		for (int i = 0; i < partFormula.size(); i++) {
+			String ele = partFormula.get(i);
+
+			boolean complex = false;
+			if (ele.contains("(") || ele.contains(")")) {
+				complex = true;
+			}
+			while (complex) {
+				partFormula.remove(i);
+				ele = keepCalculate(ele);
+				partFormula.add(i, calculatAdd(ele));
+
+				if (!ele.contains("(") && !ele.contains(")")) {
+					complex = false;
+				}
+			}
+
+			if (!isOperation(ele)) {
+				if (ele.contains("+")) {
+					partFormula.remove(i);
+					partFormula.add(i, calculatAdd(ele));
+				} else if (ele.contains("-")) {
+					partFormula.remove(i);
+					partFormula.add(i, calculatMinus(ele));
+				} else if (ele.contains("*")) {
+					partFormula.remove(i);
+					partFormula.add(i, calculatMutiply(ele));
+				} else if (ele.contains("/")) {
+					partFormula.remove(i);
+					partFormula.add(i, calculatDivide(ele));
+				} else if (ele.contains("^")) {
+					partFormula.remove(i);
+					partFormula.add(i, calculatPow(ele));
+				}
+			}
+
+		}
+		calculatPow(partFormula);
+		calculatMultiply(partFormula);
+		calculatDivide(partFormula);
+		filnalResult = filnalResult.add(calculatAdd(partFormula));
+		filnalResult = filnalResult.add(calculatMinus(partFormula));
+
+		if (partFormula.size() == 1) {
+			return partFormula.get(0);
+		}
+		return filnalResult.toString();
+	}
 
 	private String culculatePartExpression(String fraction) {
 		String newExpression = "";
@@ -244,6 +309,20 @@ public class CalculateUtil {
 		LinkedList<String> partFormula = setPartFormula(newExpression);
 		for (int i = 0; i < partFormula.size(); i++) {
 			String ele = partFormula.get(i);
+
+			boolean complex = false;
+			if (ele.contains("(") || ele.contains(")")) {
+				complex = true;
+			}
+			while (complex) {
+				partFormula.remove(i);
+				ele = keepCalculate(ele);
+				partFormula.add(i, calculatAdd(ele));
+				if (!ele.contains("(") && !ele.contains(")")) {
+					complex = false;
+				}
+			}
+
 			if (!isOperation(ele)) {
 				if (ele.contains("+")) {
 					partFormula.remove(i);
@@ -370,6 +449,30 @@ public class CalculateUtil {
 		return result;
 	}
 
+	private BigDecimal calculatMinus(LinkedList<String> partFormula) {
+		int startIndex = 0;
+		int endIndex = 0;
+		BigDecimal result = BigDecimal.ZERO;
+		while (partFormula.contains("-")) {
+			int operationIndex = partFormula.indexOf("-");
+			startIndex = operationIndex - 1;
+			endIndex = operationIndex + 1;
+			String baseString = partFormula.get(startIndex);
+			String exponentString = partFormula.get(endIndex);
+
+			BigDecimal base = new BigDecimal(putVariable(baseString));
+			BigDecimal exponent = new BigDecimal(putVariable(exponentString));
+
+			result = base.subtract((exponent), MathContext.DECIMAL128);
+
+			partFormula.remove(startIndex);
+			partFormula.remove(startIndex);
+			partFormula.remove(startIndex);
+			partFormula.add(startIndex, result.toString());
+		}
+		return result;
+	}
+
 	private String calculatMinus(String partFormula) {
 		BigDecimal result = BigDecimal.ZERO;
 		String[] numString = partFormula.split("-");
@@ -383,7 +486,7 @@ public class CalculateUtil {
 		BigDecimal result = BigDecimal.ONE;
 		String[] numString = partFormula.split("\\*");
 		for (String s : numString) {
-			result = result.multiply(new BigDecimal(s), MathContext.DECIMAL128);
+			result = result.multiply(new BigDecimal(putVariable(s)), MathContext.DECIMAL128);
 		}
 		return result.toString();
 	}
@@ -410,44 +513,22 @@ public class CalculateUtil {
 	private String calculatAdd(String partFormula) {
 		BigDecimal result = BigDecimal.ZERO;
 		String[] numString = partFormula.split("\\+");
-		for (String s : numString) {
-			result = result.add(new BigDecimal(s));
+		for (String ele : numString) {
+
+			result = result.add(new BigDecimal(putVariable(ele)));
 		}
+
 		return result.toString();
-	}
-
-	private BigDecimal calculatMinus(LinkedList<String> partFormula) {
-		int startIndex = 0;
-		int endIndex = 0;
-		BigDecimal result = BigDecimal.ZERO;
-		while (partFormula.contains("-")) {
-			int operationIndex = partFormula.indexOf("-");
-			startIndex = operationIndex - 1;
-			endIndex = operationIndex + 1;
-			String baseString = partFormula.get(startIndex);
-			String exponentString = partFormula.get(endIndex);
-
-			BigDecimal base = new BigDecimal(putVariable(baseString));
-			BigDecimal exponent = new BigDecimal(putVariable(exponentString));
-
-			result = base.subtract((exponent), MathContext.DECIMAL128);
-
-			partFormula.remove(startIndex);
-			partFormula.remove(startIndex);
-			partFormula.remove(startIndex);
-			partFormula.add(startIndex, result.toString());
-		}
-		return result;
 	}
 
 	public static void main(String[] args) {
 		CalculateUtil calculate = new CalculateUtil();
-		String formula = "(DWT+GT)*(y+2)/0.5+20^5/x+2132*2+DWT^(-0.477)+GT^(-0.477)";
+		String formula = "((((DWT+GT)*(y+2)^2/1000))^0.5+89)/0.5+20^5/x+2132*2+DWT^(-0.477)+GT^(-0.477)";
 		calculate.setFormula(formula);
 		calculate.setVariable(formula);
-		
+
 		System.out.println(calculate.getFormula());
-		
+
 		Map<String, String> variableMap = new HashMap<String, String>();
 		List<String> varList = calculate.getVariable();
 		for (String val : varList) {
