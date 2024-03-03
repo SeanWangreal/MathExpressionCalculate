@@ -237,13 +237,7 @@ public class CalculateUtil {
 		System.out.println(this.formula);
 		BigDecimal filnalResult = BigDecimal.ZERO;
 
-//		simplifyFormula(this.formula,filnalResult);
-		calculatPow(this.formula);
-		calculatMultiply(this.formula);
-		calculatDivide(this.formula);
-		System.out.println(this.formula);
-		filnalResult = filnalResult.add(calculatAdd(this.formula));
-		filnalResult = filnalResult.add(calculatMinus(this.formula));
+		filnalResult = simplifyFormula(this.formula,filnalResult);
 
 		System.out.println(filnalResult);
 		return filnalResult.toString();
@@ -259,6 +253,7 @@ public class CalculateUtil {
 		BigDecimal temp = result;
 		temp = temp.add(calculatAdd(targetFormula));
 		temp = temp.add(calculatMinus(targetFormula));
+		System.out.println(temp);
 		return temp;
 	}
 
@@ -276,10 +271,10 @@ public class CalculateUtil {
 	private void expessionToNumber(String function, LinkedList<String> partFormula, int indexOfFormula)
 			throws Exception {
 		if (!isOperation(function)) {
-			if (function.contains("+")) {
+			if (function.contains("+") && !function.startsWith("+")) {
 				partFormula.remove(indexOfFormula);
 				partFormula.add(indexOfFormula, calculatAdd(function));
-			} else if (function.contains("-")) {
+			} else if (function.contains("-") && !function.startsWith("-")) {
 				partFormula.remove(indexOfFormula);
 				partFormula.add(indexOfFormula, calculatMinus(function));
 			} else if (function.contains("*")) {
@@ -353,12 +348,8 @@ public class CalculateUtil {
 			expessionToNumber(ele, partFormula, i);
 
 		}
-
-		calculatPow(partFormula);
-		calculatMultiply(partFormula);
-		calculatDivide(partFormula);
-		filnalResult = filnalResult.add(calculatAdd(partFormula));
-		filnalResult = filnalResult.add(calculatMinus(partFormula));
+		
+		filnalResult = simplifyFormula(partFormula ,filnalResult);
 
 		if (partFormula.size() == 1) {
 			return partFormula.get(0);
@@ -534,7 +525,7 @@ public class CalculateUtil {
 
 	public static void main(String[] args) {
 		CalculateUtil calculate = new CalculateUtil();
-		String formula = "((((DWT+GT)*(y+2)^2/1000))^0.5+89)/0.5+20^5/x+2132*2+DWT^(-0.477)+GT^(-0.477)+2^2^2^2";
+		String formula = "( ( ( (DWT+GT) * (y+2)^2 / 1000 ) )^0.5+89)/0.5+20^5/x + 2132*2 + DWT^(-0.477)+ (GT^(-0.477)) ^y +2^2^2^2";
 		calculate.setFormula(formula);
 		calculate.setVariable(formula);
 
@@ -554,7 +545,7 @@ public class CalculateUtil {
 				variableMap.put(val, "7000");
 				break;
 			case "y":
-				variableMap.put(val, "100");
+				variableMap.put(val, "2");
 				break;
 
 			default:
