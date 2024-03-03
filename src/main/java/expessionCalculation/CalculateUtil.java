@@ -57,13 +57,16 @@ public class CalculateUtil {
 	}
 
 	private LinkedList<String> setPartFormula(String formula) {
-//		((10000+2)*(2+2))/0.5+0^5
 		List<String> formulaList = Arrays.asList(formula.split(""));
 		LinkedList<String> partFormula = new LinkedList<String>();
+		
 		String function = "";
+		
 		boolean complex = false;
+		
 		int countLeftParentheses = 0;
 		int countRightParentheses = 0;
+		
 		for (int i = 0; i < formulaList.size(); i++) {
 			String s = formulaList.get(i);
 
@@ -73,6 +76,7 @@ public class CalculateUtil {
 				}
 				countLeftParentheses++;
 				complex = true;
+				
 			} else if (s.equals(")")) {
 				countRightParentheses++;
 				if (countRightParentheses != countLeftParentheses) {
@@ -121,12 +125,18 @@ public class CalculateUtil {
 		} else {
 			cleanFormula.append(formula);
 		}
+		
 		List<String> formulaList = Arrays.asList(cleanFormula.toString().split(""));
+		
 		this.formula = new LinkedList<String>();
+		
 		String function = "";
+		
 		boolean complex = false;
+		
 		int countLeftParentheses = 0;
 		int countRightParentheses = 0;
+		
 		System.out.println(formulaList);
 		for (int i = 0; i < formulaList.size(); i++) {
 			String s = formulaList.get(i);
@@ -199,7 +209,10 @@ public class CalculateUtil {
 		}
 	}
 
-	public String runFormula() throws Exception{
+	public String runFormula() throws Exception {
+		if (this.variable.size() != this.variableVal.size()) {
+			throw new Exception("There's variable isn't mapped");
+		}
 
 		for (int i = 0; i < this.formula.size(); i++) {
 			String function = this.formula.get(i);
@@ -224,6 +237,7 @@ public class CalculateUtil {
 		System.out.println(this.formula);
 		BigDecimal filnalResult = BigDecimal.ZERO;
 
+//		simplifyFormula(this.formula,filnalResult);
 		calculatPow(this.formula);
 		calculatMultiply(this.formula);
 		calculatDivide(this.formula);
@@ -234,16 +248,33 @@ public class CalculateUtil {
 		System.out.println(filnalResult);
 		return filnalResult.toString();
 	}
+	
+	private BigDecimal simplifyFormula(LinkedList<String> targetFormula, BigDecimal result) throws Exception {
+		calculatPow(targetFormula);
+		calculatMultiply(targetFormula);
+		calculatDivide(targetFormula);
+		
+		System.out.println(targetFormula);
+		
+		BigDecimal temp = result;
+		temp = temp.add(calculatAdd(targetFormula));
+		temp = temp.add(calculatMinus(targetFormula));
+		return temp;
+	}
 
-	private String putVariable(String val) {
+	private String putVariable(String val) throws Exception {
 		String num = val;
 		if (this.variable.contains(val)) {
+			
 			int index = this.variable.indexOf(val);
+
 			num = this.variableVal.get(index);
 		}
 		return num.toString();
 	}
-	private void expessionToNumber(String function,LinkedList<String> partFormula, int indexOfFormula) {
+
+	private void expessionToNumber(String function, LinkedList<String> partFormula, int indexOfFormula)
+			throws Exception {
 		if (!isOperation(function)) {
 			if (function.contains("+")) {
 				partFormula.remove(indexOfFormula);
@@ -263,8 +294,9 @@ public class CalculateUtil {
 			}
 		}
 	}
-	//遞迴
-	private String keepCalculate(String fraction) {
+
+	// 遞迴
+	private String keepCalculate(String fraction) throws Exception {
 		BigDecimal filnalResult = BigDecimal.ZERO;
 
 		LinkedList<String> partFormula = setPartFormula(fraction);
@@ -285,7 +317,7 @@ public class CalculateUtil {
 				}
 			}
 
-			expessionToNumber(ele, partFormula,i);
+			expessionToNumber(ele, partFormula, i);
 
 		}
 		calculatPow(partFormula);
@@ -300,7 +332,7 @@ public class CalculateUtil {
 		return filnalResult.toString();
 	}
 
-	private String culculatePartExpression(String fraction) {
+	private String culculatePartExpression(String fraction) throws Exception {
 		String newExpression = "";
 		for (int i = 0; i < fraction.length(); i++) {
 			newExpression += putVariable(String.valueOf(fraction.charAt(i)));
@@ -318,8 +350,8 @@ public class CalculateUtil {
 				partFormula.add(i, calculatAdd(ele));
 			}
 
-			expessionToNumber(ele, partFormula,i);
-			
+			expessionToNumber(ele, partFormula, i);
+
 		}
 
 		calculatPow(partFormula);
@@ -334,7 +366,7 @@ public class CalculateUtil {
 		return filnalResult.toString();
 	}
 
-	private void calculatPow(LinkedList<String> partFormula) {
+	private void calculatPow(LinkedList<String> partFormula) throws Exception {
 		int startIndex = 0;
 		int endIndex = 0;
 		BigDecimal result = BigDecimal.ZERO;
@@ -358,7 +390,7 @@ public class CalculateUtil {
 		}
 	}
 
-	private void calculatMultiply(LinkedList<String> partFormula) {
+	private void calculatMultiply(LinkedList<String> partFormula) throws Exception {
 		int startIndex = 0;
 		int endIndex = 0;
 		BigDecimal result = BigDecimal.ZERO;
@@ -381,7 +413,7 @@ public class CalculateUtil {
 		}
 	}
 
-	private void calculatDivide(LinkedList<String> partFormula) {
+	private void calculatDivide(LinkedList<String> partFormula) throws Exception {
 		int startIndex = 0;
 		int endIndex = 0;
 		BigDecimal result = BigDecimal.ZERO;
@@ -404,7 +436,7 @@ public class CalculateUtil {
 		}
 	}
 
-	private BigDecimal calculatAdd(LinkedList<String> partFormula) {
+	private BigDecimal calculatAdd(LinkedList<String> partFormula) throws Exception {
 		int startIndex = 0;
 		int endIndex = 0;
 		BigDecimal result = BigDecimal.ZERO;
@@ -428,7 +460,7 @@ public class CalculateUtil {
 		return result;
 	}
 
-	private BigDecimal calculatMinus(LinkedList<String> partFormula) {
+	private BigDecimal calculatMinus(LinkedList<String> partFormula) throws Exception {
 		int startIndex = 0;
 		int endIndex = 0;
 		BigDecimal result = BigDecimal.ZERO;
@@ -452,7 +484,7 @@ public class CalculateUtil {
 		return result;
 	}
 
-	private String calculatMinus(String partFormula) {
+	private String calculatMinus(String partFormula) throws Exception {
 		BigDecimal result = BigDecimal.ZERO;
 		String[] numString = partFormula.split("-");
 		BigDecimal front = new BigDecimal(putVariable(numString[0]));
@@ -461,7 +493,7 @@ public class CalculateUtil {
 		return result.toString();
 	}
 
-	private String calculatMutiply(String partFormula) {
+	private String calculatMutiply(String partFormula) throws Exception {
 		BigDecimal result = BigDecimal.ONE;
 		String[] numString = partFormula.split("\\*");
 		for (String s : numString) {
@@ -470,7 +502,7 @@ public class CalculateUtil {
 		return result.toString();
 	}
 
-	private String calculatDivide(String partFormula) {
+	private String calculatDivide(String partFormula) throws Exception {
 		BigDecimal result = BigDecimal.ZERO;
 		String[] numString = partFormula.split("/");
 		BigDecimal divideChild = new BigDecimal(putVariable(numString[0]));
@@ -479,7 +511,7 @@ public class CalculateUtil {
 		return result.toString();
 	}
 
-	private String calculatPow(String partFormula) {
+	private String calculatPow(String partFormula) throws Exception {
 		BigDecimal result = BigDecimal.ZERO;
 		String[] numString = partFormula.split("^");
 		BigDecimal base = new BigDecimal(putVariable(numString[0]));
@@ -489,7 +521,7 @@ public class CalculateUtil {
 		return result.toString();
 	}
 
-	private String calculatAdd(String partFormula) {
+	private String calculatAdd(String partFormula) throws Exception {
 		BigDecimal result = BigDecimal.ZERO;
 		String[] numString = partFormula.split("\\+");
 		for (String ele : numString) {
@@ -534,7 +566,8 @@ public class CalculateUtil {
 		try {
 			calculate.runFormula();
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e.getMessage());
+			e.getMessage();
 		}
 	}
 }
