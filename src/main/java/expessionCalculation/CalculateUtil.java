@@ -109,7 +109,7 @@ public class CalculateUtil {
 		return partFormula;
 	}
 
-	private void setFormula(String formula) {
+	public void setFormula(String formula) {
 		StringBuilder cleanFormula = new StringBuilder();
 		if (formula.contains(" ")) {
 			for (int i = 0; i < formula.length(); i++) {
@@ -189,7 +189,7 @@ public class CalculateUtil {
 		}
 	}
 
-	private void setVariableVal(Map<String, String> vals) {
+	public void setVariableVal(Map<String, String> vals) {
 		this.variableVal = new ArrayList<String>();
 		for (String variableName : this.variable) {
 			String val = vals.get(variableName);
@@ -199,7 +199,7 @@ public class CalculateUtil {
 		}
 	}
 
-	private String runFormula() {
+	public String runFormula() throws Exception{
 
 		for (int i = 0; i < this.formula.size(); i++) {
 			String function = this.formula.get(i);
@@ -243,7 +243,26 @@ public class CalculateUtil {
 		}
 		return num.toString();
 	}
-	
+	private void expessionToNumber(String function,LinkedList<String> partFormula, int indexOfFormula) {
+		if (!isOperation(function)) {
+			if (function.contains("+")) {
+				partFormula.remove(indexOfFormula);
+				partFormula.add(indexOfFormula, calculatAdd(function));
+			} else if (function.contains("-")) {
+				partFormula.remove(indexOfFormula);
+				partFormula.add(indexOfFormula, calculatMinus(function));
+			} else if (function.contains("*")) {
+				partFormula.remove(indexOfFormula);
+				partFormula.add(indexOfFormula, calculatMutiply(function));
+			} else if (function.contains("/")) {
+				partFormula.remove(indexOfFormula);
+				partFormula.add(indexOfFormula, calculatDivide(function));
+			} else if (function.contains("^")) {
+				partFormula.remove(indexOfFormula);
+				partFormula.add(indexOfFormula, calculatPow(function));
+			}
+		}
+	}
 	//遞迴
 	private String keepCalculate(String fraction) {
 		BigDecimal filnalResult = BigDecimal.ZERO;
@@ -266,24 +285,7 @@ public class CalculateUtil {
 				}
 			}
 
-			if (!isOperation(ele)) {
-				if (ele.contains("+")) {
-					partFormula.remove(i);
-					partFormula.add(i, calculatAdd(ele));
-				} else if (ele.contains("-")) {
-					partFormula.remove(i);
-					partFormula.add(i, calculatMinus(ele));
-				} else if (ele.contains("*")) {
-					partFormula.remove(i);
-					partFormula.add(i, calculatMutiply(ele));
-				} else if (ele.contains("/")) {
-					partFormula.remove(i);
-					partFormula.add(i, calculatDivide(ele));
-				} else if (ele.contains("^")) {
-					partFormula.remove(i);
-					partFormula.add(i, calculatPow(ele));
-				}
-			}
+			expessionToNumber(ele, partFormula,i);
 
 		}
 		calculatPow(partFormula);
@@ -310,37 +312,14 @@ public class CalculateUtil {
 		for (int i = 0; i < partFormula.size(); i++) {
 			String ele = partFormula.get(i);
 
-			boolean complex = false;
 			if (ele.contains("(") || ele.contains(")")) {
-				complex = true;
-			}
-			while (complex) {
 				partFormula.remove(i);
 				ele = keepCalculate(ele);
 				partFormula.add(i, calculatAdd(ele));
-				if (!ele.contains("(") && !ele.contains(")")) {
-					complex = false;
-				}
 			}
 
-			if (!isOperation(ele)) {
-				if (ele.contains("+")) {
-					partFormula.remove(i);
-					partFormula.add(i, calculatAdd(ele));
-				} else if (ele.contains("-")) {
-					partFormula.remove(i);
-					partFormula.add(i, calculatMinus(ele));
-				} else if (ele.contains("*")) {
-					partFormula.remove(i);
-					partFormula.add(i, calculatMutiply(ele));
-				} else if (ele.contains("/")) {
-					partFormula.remove(i);
-					partFormula.add(i, calculatDivide(ele));
-				} else if (ele.contains("^")) {
-					partFormula.remove(i);
-					partFormula.add(i, calculatPow(ele));
-				}
-			}
+			expessionToNumber(ele, partFormula,i);
+			
 		}
 
 		calculatPow(partFormula);
@@ -361,7 +340,7 @@ public class CalculateUtil {
 		BigDecimal result = BigDecimal.ZERO;
 		System.out.println(partFormula);
 		while (partFormula.contains("^")) {
-			int operationIndex = partFormula.indexOf("^");
+			int operationIndex = partFormula.lastIndexOf("^");
 			startIndex = operationIndex - 1;
 			endIndex = operationIndex + 1;
 			String baseString = partFormula.get(startIndex);
@@ -523,7 +502,7 @@ public class CalculateUtil {
 
 	public static void main(String[] args) {
 		CalculateUtil calculate = new CalculateUtil();
-		String formula = "((((DWT+GT)*(y+2)^2/1000))^0.5+89)/0.5+20^5/x+2132*2+DWT^(-0.477)+GT^(-0.477)";
+		String formula = "((((DWT+GT)*(y+2)^2/1000))^0.5+89)/0.5+20^5/x+2132*2+DWT^(-0.477)+GT^(-0.477)+2^2^2^2";
 		calculate.setFormula(formula);
 		calculate.setVariable(formula);
 
@@ -552,6 +531,10 @@ public class CalculateUtil {
 		}
 		calculate.setVariableVal(variableMap);
 
-		calculate.runFormula();
+		try {
+			calculate.runFormula();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
