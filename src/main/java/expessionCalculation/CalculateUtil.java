@@ -59,14 +59,14 @@ public class CalculateUtil {
 	private LinkedList<String> setPartFormula(String formula) {
 		List<String> formulaList = Arrays.asList(formula.split(""));
 		LinkedList<String> partFormula = new LinkedList<String>();
-		
+
 		String function = "";
-		
+
 		boolean complex = false;
-		
+
 		int countLeftParentheses = 0;
 		int countRightParentheses = 0;
-		
+
 		for (int i = 0; i < formulaList.size(); i++) {
 			String s = formulaList.get(i);
 
@@ -76,7 +76,7 @@ public class CalculateUtil {
 				}
 				countLeftParentheses++;
 				complex = true;
-				
+
 			} else if (s.equals(")")) {
 				countRightParentheses++;
 				if (countRightParentheses != countLeftParentheses) {
@@ -113,30 +113,37 @@ public class CalculateUtil {
 		return partFormula;
 	}
 
-	public void setFormula(String formula) {
+	public void setFormula(String formula) throws Exception {
 		StringBuilder cleanFormula = new StringBuilder();
-		if (formula.contains(" ")) {
-			for (int i = 0; i < formula.length(); i++) {
-				char chr = formula.charAt(i);
-				if (chr != ' ') {
-					cleanFormula.append(chr);
-				}
+		int left = 0;
+		int right = 0;
+		for (int i = 0; i < formula.length(); i++) {
+			char chr = formula.charAt(i);
+			if (chr != ' ') {
+				cleanFormula.append(chr);
 			}
-		} else {
-			cleanFormula.append(formula);
+			if (chr == '(') {
+				left++;
+			}
+			if (chr == ')') {
+				right++;
+			}
 		}
-		
+		if (left != right) {
+			throw new Exception(left+" '(' and "+right+" ')' . Not balanced!");
+		}
+
 		List<String> formulaList = Arrays.asList(cleanFormula.toString().split(""));
-		
+
 		this.formula = new LinkedList<String>();
-		
+
 		String function = "";
-		
+
 		boolean complex = false;
-		
+
 		int countLeftParentheses = 0;
 		int countRightParentheses = 0;
-		
+
 		System.out.println(formulaList);
 		for (int i = 0; i < formulaList.size(); i++) {
 			String s = formulaList.get(i);
@@ -237,19 +244,19 @@ public class CalculateUtil {
 		System.out.println(this.formula);
 		BigDecimal filnalResult = BigDecimal.ZERO;
 
-		filnalResult = simplifyFormula(this.formula,filnalResult);
+		filnalResult = simplifyFormula(this.formula, filnalResult);
 
 		System.out.println(filnalResult);
 		return filnalResult.toString();
 	}
-	
+
 	private BigDecimal simplifyFormula(LinkedList<String> targetFormula, BigDecimal result) throws Exception {
 		calculatPow(targetFormula);
 		calculatMultiply(targetFormula);
 		calculatDivide(targetFormula);
-		
+
 		System.out.println(targetFormula);
-		
+
 		BigDecimal temp = result;
 		temp = temp.add(calculatAdd(targetFormula));
 		temp = temp.add(calculatMinus(targetFormula));
@@ -260,7 +267,7 @@ public class CalculateUtil {
 	private String putVariable(String val) throws Exception {
 		String num = val;
 		if (this.variable.contains(val)) {
-			
+
 			int index = this.variable.indexOf(val);
 
 			num = this.variableVal.get(index);
@@ -348,8 +355,8 @@ public class CalculateUtil {
 			expessionToNumber(ele, partFormula, i);
 
 		}
-		
-		filnalResult = simplifyFormula(partFormula ,filnalResult);
+
+		filnalResult = simplifyFormula(partFormula, filnalResult);
 
 		if (partFormula.size() == 1) {
 			return partFormula.get(0);
@@ -525,40 +532,40 @@ public class CalculateUtil {
 
 	public static void main(String[] args) {
 		CalculateUtil calculate = new CalculateUtil();
-		String formula = "( ( ( (DWT+GT) * (y+2)^2 / 1000 ) )^0.5+89)/0.5+20^5/x + 2132*2 + DWT^(-0.477)+ (GT^(-0.477)) ^y +2^2^2^2";
-		calculate.setFormula(formula);
-		calculate.setVariable(formula);
-
-		System.out.println(calculate.getFormula());
-
-		Map<String, String> variableMap = new HashMap<String, String>();
-		List<String> varList = calculate.getVariable();
-		for (String val : varList) {
-			switch (val) {
-			case "DWT":
-				variableMap.put(val, "20000");
-				break;
-			case "GT":
-				variableMap.put(val, "35000");
-				break;
-			case "x":
-				variableMap.put(val, "7000");
-				break;
-			case "y":
-				variableMap.put(val, "2");
-				break;
-
-			default:
-				break;
-			}
-		}
-		calculate.setVariableVal(variableMap);
-
+		String formula = "( ( ( (DWT+GT) * (y+2)^2 / 1000 ) )^0.5+89)/0.5+20^5/x + 2132*2 + DWT^(+0.477)+ (GT^(+0.477)) ^(y-20) +2^2^2^2";
 		try {
+			calculate.setFormula(formula);
+			calculate.setVariable(formula);
+
+			System.out.println(calculate.getFormula());
+
+			Map<String, String> variableMap = new HashMap<String, String>();
+			List<String> varList = calculate.getVariable();
+			for (String val : varList) {
+				switch (val) {
+				case "DWT":
+					variableMap.put(val, "20000");
+					break;
+				case "GT":
+					variableMap.put(val, "35000");
+					break;
+				case "x":
+					variableMap.put(val, "7000");
+					break;
+				case "y":
+					variableMap.put(val, "2");
+					break;
+
+				default:
+					break;
+				}
+			}
+			calculate.setVariableVal(variableMap);
+
 			calculate.runFormula();
+
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			e.getMessage();
+			e.printStackTrace();
 		}
 	}
 }
