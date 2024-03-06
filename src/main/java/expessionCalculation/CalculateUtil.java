@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
+
 public class CalculateUtil {
 
 	private List<String> variable;
@@ -28,7 +29,7 @@ public class CalculateUtil {
 		return ans;
 	}
 	
-	public void setScale(int scale) {
+	public void setScale(Integer scale) {
 		this.scale = scale;
 	}
 	
@@ -210,12 +211,21 @@ public class CalculateUtil {
 
 	}
 
-	public void setVariableVal(Map<String, String> vals) {
+	public void setVariableVal(Map<String, String> vals) throws Exception {
 		this.variableVal = new ArrayList<String>();
+		Pattern pattern = Pattern.compile("^-?\\d+(\\.\\d+)?$");
 		if (vals != null) {
 			for (String variableName : this.variable) {
 				String val = vals.get(variableName);
-				if (val != null) {
+				if (val == null) {
+					throw new Exception("In CalculatUtil, Your variable's value null! Your variableName: "+variableName+" Your value: "+val);
+				} else if (val.isBlank() || val.isEmpty()) {
+					throw new Exception("In CalculatUtil, Your variable's value Empty! Your variableName: "+variableName+" Your value: "+val);
+				} else if ( ! pattern.matcher(val).matches()){
+					throw new Exception("In CalculatUtil, Your variable's value is not Number! Your variableName: "+variableName+" Your value: "+val);
+				}
+				
+				if (val != null && !val.isBlank() && !val.isEmpty()) {
 					this.variableVal.add(val);
 				}
 			}
@@ -271,7 +281,7 @@ public class CalculateUtil {
 				}
 				leftCalculateUtil.runFormula();
 			} catch (Exception e) {
-				e.printStackTrace();
+				throw new RuntimeException("Exception occurred during asynchronous task", e);
 			}
 		});
 		CalculateUtil rightCalculateUtil = new CalculateUtil();
