@@ -233,7 +233,7 @@ public class CalculateUtil {
 	}
 
 	public String runFormula() throws Exception {
-		if (this.variable != null && this.variableVal != null && (this.variable.size() != this.variableVal.size())) {
+		if (this.variable != null && this.variableVal != null && (this.variable.size() > this.variableVal.size())) {
 			throw new Exception("There's variable isn't mapped");
 		}
 
