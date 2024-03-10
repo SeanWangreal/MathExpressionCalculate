@@ -72,6 +72,9 @@ public class CalculateUtil {
 				variableName = new StringBuilder();
 			}
 		}
+		this.variable.remove("e");
+		this.variable.remove("E");
+		
 	}
 
 	private LinkedList<String> setPartFormula(String formula) {
@@ -131,14 +134,14 @@ public class CalculateUtil {
 	}
 
 	public void setFormulaAndVariable(String formula) throws Exception {
-		StringBuilder cleanFormula = new StringBuilder();
+		
+		String cleanFormula = formula.replaceAll(" ", "");
 		int left = 0;
 		int right = 0;
-		for (int i = 0; i < formula.length(); i++) {
-			char chr = formula.charAt(i);
-			if (chr != ' ') {
-				cleanFormula.append(chr);
-			}
+		
+		for (int i = 0; i < cleanFormula.length(); i++) {
+			char chr = cleanFormula.charAt(i);
+			
 			if (chr == '(') {
 				left++;
 			}
@@ -150,7 +153,7 @@ public class CalculateUtil {
 			throw new Exception(left + " '(' and " + right + " ')' . Not balanced!");
 		}
 
-		List<String> formulaList = Arrays.asList(cleanFormula.toString().split(""));
+		List<String> formulaList = Arrays.asList(cleanFormula.split(""));
 
 		CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 			setVariable(formulaList);
@@ -312,6 +315,10 @@ public class CalculateUtil {
 			fitOrNot = leftAns >= rightAns;
 			break;
 		}
+		case "≧": {
+			fitOrNot = leftAns >= rightAns;
+			break;
+		}
 		case "<": {
 			fitOrNot = leftAns < rightAns;
 			break;
@@ -324,11 +331,19 @@ public class CalculateUtil {
 			fitOrNot = leftAns <= rightAns;
 			break;
 		}
+		case "≦": {
+			fitOrNot = leftAns <= rightAns;
+			break;
+		}
 		case "=": {
 			fitOrNot = leftAns == rightAns;
 			break;
 		}
 		case "!=": {
+			fitOrNot = leftAns != rightAns;
+			break;
+		}
+		case "≠": {
 			fitOrNot = leftAns != rightAns;
 			break;
 		}
@@ -378,6 +393,8 @@ public class CalculateUtil {
 			int index = this.variable.indexOf(val);
 
 			num = this.variableVal.get(index);
+		} else if (val.equals("e") || val.equals("E")) {
+			num =  String.valueOf(Math.E);
 		}
 		return num.toString();
 	}
@@ -656,43 +673,25 @@ public class CalculateUtil {
 
 	public static void main(String[] args) {
 		CalculateUtil calculate = new CalculateUtil();
-		String formula = "( ( ( (DWT+GT) * (y+2)^(2 ÷ 1000 )) )^0.5+89)/0.5+20^5/x + 2132*2  + DWT^(+0.477)+ (GT^(+0.477)) ^(y-20) +2^2^2^2";
 		try {
-//			calculate.setFormulaAndVariable(formula);
+			String expression = "( ( (x + y)^z) + 9 ) * (x+z) + (5 * 9)^(7*2)+u+E^E";
 
-//			System.out.println(calculate.getFormula());
 
-			Map<String, String> variableMap = new HashMap<String, String>();
-//			List<String> varList = calculate.getVariable();
-//			for (String val : varList) {
-//				switch (val) {
-//				case "DWT":
-//					variableMap.put(val, "20000");
-//					break;
-//				case "GT":
-//					variableMap.put(val, "35000");
-//					break;
-//				case "x":
-//					variableMap.put(val, "7000");
-//					break;
-//				case "y":
-//					variableMap.put(val, "2");
-//					break;
-//
-//				default:
-//					break;
-//				}
-//			}
+			calculate.setFormulaAndVariable(expression);
 
-//			calculate.setVariableVal(variableMap);
-			variableMap.put("DWT", "20000");
-			variableMap.put("GT", "35000");
-			variableMap.put("x", "7000");
-			variableMap.put("y", "2");
+			Map<String,String> map = new HashMap<String,String>();
+			map.put("x","7");
+			map.put("y","8");
+			map.put("z","2");
+			map.put("u","2");
 
-			Boolean ans = CalculateUtil.runComparativeExpression(formula, variableMap, "<", "2÷0.3", variableMap);
+			calculate.setVariableVal(map);
 
-			System.out.println(ans);
+			calculate.runFormula();
+
+//			Boolean ans = CalculateUtil.runComparativeExpression(formula, variableMap, "<", "2÷0.3", variableMap);
+
+			System.out.println(calculate.getAns());
 //			calculate.runFormula();
 
 		} catch (Exception e) {
