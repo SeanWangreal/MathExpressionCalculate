@@ -1,10 +1,10 @@
-"# MathExpressionCalculate" 
-Ex: Put String expression in CalculateUtil and get Answer
+"# MathExpressionCalculate"   
+  Ex: Put String expression in CalculateUtil and get Answer
 
-Expression = (((x + y)^z) + 9) * (x + z) + (5 * 9)^2
-x = 7
-y = 8
-z = 2
+  Expression = (((x + y)^z) + 9) * (x + z) + (5 * 9)^2  
+    x = 7  
+  y = 8  
+  z = 2  
 Like 
 
 	try {
