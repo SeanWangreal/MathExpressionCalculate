@@ -455,14 +455,10 @@ public class CalculateUtil {
 	}
 
 	private String culculatePartExpression(String fraction) throws Exception {
-		String newExpression = "";
-		for (int i = 0; i < fraction.length(); i++) {
-			newExpression += putVariable(String.valueOf(fraction.charAt(i)));
-		}
 
 		BigDecimal filnalResult = BigDecimal.ZERO;
 
-		LinkedList<String> partFormula = setPartFormula(newExpression);
+		LinkedList<String> partFormula = setPartFormula(fraction);
 		for (int i = 0; i < partFormula.size(); i++) {
 			String ele = partFormula.get(i);
 
